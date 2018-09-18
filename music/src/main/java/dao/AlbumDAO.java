@@ -14,14 +14,28 @@ public class AlbumDAO {
     }
 
     public Album createAlbum(Album album){
-        //TODO: Implement this CRUD function
+       //when user wants to we add album and update the table
+
+       this.jdbcTemplate.update(
+           "INSERT INTO albums (id, title) VALUES (?,?)", album.getId(), album.getTitle()
+       );
         return album;
     }
 
     public Album getAlbum(int id){
         Album album = new Album(id, "");
-        //TODO: Implement this CRUD function
+        //Part of the insert/update function for albums
+
         //Get album and set tracks using getTracksByAlbumId(id) in TracksDAO
+        TrackDAO tracksDAOtemp = new TrackDAO(jdbcTemplate);
+
+        this.jdbcTemplate.query(
+                "SELECT * FROM albums", new Object[] { },
+                (rs, rowNum) -> new Album(rs.getInt("id"), rs.getString("title"))
+        ).forEach(addedAlbum -> {
+            album.setTracks(tracksDAOtemp.getTracksByAlbumId(id));
+            album.setTitle(addedAlbum.getTitle());
+        });
         return album;
     }
 
@@ -36,13 +50,22 @@ public class AlbumDAO {
     }
 
     public Album updateAlbum(Album album){
-        //TODO: Implement this CRUD function
+        //changes information in the album depending on what needs to be updated
+          this.jdbcTemplate.update("UPDATE albums SET title = ? WHERE id = ? ",
+          album.getTitle(), album.getId()
+        );
         return album;
     }
 
     public boolean deleteAlbum(Album album){
         boolean success = false;
-        //TODO: Implement this CRUD function
+        //deletes the album specified by id and notifies us by returning 
+        //a boolean
+
+        this.jdbcTemplate.update("DELETE FROM albums WHERE id = ? ",
+          album.getId()
+        );
+        success = true;
         return success;
     }
 
